@@ -69,10 +69,20 @@
     .swatch.active{transform:scale(1.15);box-shadow:0 0 0 3px #DCE7FF}
     .field{margin-bottom:14px}
     .field label{display:block;font-size:13px;font-weight:800;margin-bottom:7px;color:#344054}
+    .event-bg-box{border:1px dashed #D6C58E;background:linear-gradient(135deg,#fffdf8,#fbf7ea);border-radius:20px;padding:14px;margin-bottom:14px}
+    .event-bg-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .event-bg-preview{margin-top:12px;display:none;position:relative;overflow:hidden;border-radius:16px;border:1px solid #E7DFC7;background:#fff;aspect-ratio:16/7}
+    .event-bg-preview.show{display:block}.event-bg-preview img{width:100%;height:100%;object-fit:cover;display:block}
+    .event-bg-preview .event-bg-label{position:absolute;left:10px;bottom:10px;background:rgba(17,24,39,.72);color:#fff;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:800;backdrop-filter:blur(6px)}
+    .checkin-time-box{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:-4px;margin-bottom:16px;padding:11px 14px;border:1px solid #eadfbe;background:linear-gradient(135deg,#fffdf7,#f8f2df);border-radius:16px;color:#66531e;font-size:13px}
+    .checkin-time-box strong{font-size:14px;color:#3d3214}.checkin-time-box .clock-dot{width:9px;height:9px;border-radius:50%;background:#34A853;box-shadow:0 0 0 5px rgba(52,168,83,.10);flex:0 0 auto}
+    .guest-time{font-size:12px;color:#8a7750;margin-top:8px;font-weight:700}.modal-time{font-size:13px;color:#8a7750;margin-top:10px;font-weight:700}
     .input,.textarea{width:100%;border:1px solid #D9DEE7;border-radius:18px;background:#fff;padding:13px 15px;outline:none;transition:.2s;color:#101828}
     .textarea{min-height:110px;resize:vertical}
     .input:focus,.textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(66,133,244,.10)}
     .hint{font-size:12px;color:var(--muted);line-height:1.6}
+    .camera-help{margin-top:12px;padding:12px 14px;border-radius:18px;background:#FFF9E8;border:1px solid #F4DE9A;color:#6B5A1F;font-size:12px;line-height:1.65;display:none}
+    .camera-help.show{display:block}
     .submit-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
     .status-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
     .status-chip{padding:7px 10px;border-radius:999px;background:#F8F9FA;color:#667085;font-size:12px;font-weight:700}
@@ -171,6 +181,8 @@
 
           <div class="camera-toolbar">
             <button class="pill-btn blue" id="openCameraBtn">📷 เปิดกล้อง</button>
+            <button class="pill-btn secondary" id="uploadPhotoBtn">🖼️ เลือกรูปจากเครื่อง</button>
+            <input type="file" id="uploadPhotoInput" accept="image/*" capture="user" hidden>
             <button class="pill-btn primary" id="captureBtn" disabled>● ถ่ายรูป</button>
             <button class="pill-btn secondary" id="retakeBtn" disabled>↻ ถ่ายใหม่</button>
             <button class="pill-btn danger" id="clearDrawBtn">⌫ ลบเส้น</button>
@@ -182,6 +194,7 @@
             </div>
           </div>
           <p class="hint" style="margin:12px 2px 0">หลังถ่ายรูป สามารถใช้นิ้วหรือเมาส์วาดลายเซ็นทับบนภาพได้โดยตรง</p>
+          <div class="camera-help" id="cameraHelp"></div>
         </div>
 
         <div class="card">
@@ -190,7 +203,22 @@
             <div class="field"><label for="name">ชื่อ - นามสกุล</label><input class="input" id="name" required placeholder="เช่น นายสมชาย ใจดี"></div>
             <div class="field"><label for="position">ตำแหน่ง</label><input class="input" id="position" placeholder="เช่น ผู้อำนวยการสถานศึกษา"></div>
             <div class="field"><label for="affiliation">สังกัด</label><input class="input" id="affiliation" placeholder="เช่น โรงเรียน... / หน่วยงาน..."></div>
+            <div class="field"><label for="subject">เรื่อง</label><input class="input" id="subject" placeholder="เช่น เข้ารับการอบรมเรื่อง... / เข้าเยี่ยมชมและศึกษาดูงาน..."></div>
+            <div class="event-bg-box">
+              <div class="field" style="margin-bottom:8px"><label>ภาพพื้นหลังกิจกรรม</label><div class="hint">เลือกโปสเตอร์/แบ็กดรอปของการอบรมหรือการมาเยือน ระบบจะนำไปประกอบกับภาพผู้เช็คอินโดยอัตโนมัติ และใช้เป็นพื้นหลังหน้าจอใหญ่ของกิจกรรมปัจจุบัน</div></div>
+              <div class="event-bg-row">
+                <button class="pill-btn blue" type="button" id="eventBgBtn">🖼️ เลือกภาพพื้นหลังกิจกรรม</button>
+                <button class="pill-btn secondary" type="button" id="clearEventBgBtn">✕ ล้างพื้นหลัง</button>
+                <input type="file" id="eventBgInput" accept="image/*" hidden>
+              </div>
+              <div class="event-bg-preview" id="eventBgPreview"><img id="eventBgPreviewImg" alt="ตัวอย่างพื้นหลังกิจกรรม"><span class="event-bg-label" id="eventBgName">พื้นหลังกิจกรรมปัจจุบัน</span></div>
+            </div>
             <div class="field"><label for="message">ข้อความต้อนรับ / คำอวยพร</label><textarea class="textarea" id="message" placeholder="ฝากข้อความแห่งความประทับใจ..."></textarea></div>
+            <div class="checkin-time-box" aria-live="polite">
+              <span class="clock-dot"></span>
+              <span>เวลาเช็คอินอัตโนมัติ</span>
+              <strong id="checkinClock">กำลังอ่านเวลา...</strong>
+            </div>
             <div class="submit-row"><button class="pill-btn gold" type="submit" id="submitBtn">✨ เช็คอิน & ส่งขึ้นจอใหญ่</button></div>
             <div class="status-strip">
               <span class="status-chip" id="storageStatus">localStorage: พร้อม</span>
@@ -234,7 +262,9 @@
       <div class="modal-info">
         <h3 id="modalName"></h3>
         <div class="modal-role" id="modalRole"></div>
+        <div class="modal-role" id="modalSubject" style="margin-top:10px;font-weight:800;color:#7A5B13"></div>
         <div class="quote" id="modalMessage"></div>
+        <div class="modal-time" id="modalTime"></div>
         <div class="modal-admin-actions">
           <button class="pill-btn blue" id="modalEditBtn">✎ แก้ไข</button>
           <button class="pill-btn danger" id="modalDeleteBtn">🗑 ลบ</button>
@@ -265,6 +295,7 @@
       <div class="field"><label>ชื่อ - นามสกุล</label><input class="input" id="editName"></div>
       <div class="field"><label>ตำแหน่ง</label><input class="input" id="editPosition"></div>
       <div class="field"><label>สังกัด</label><input class="input" id="editAffiliation"></div>
+      <div class="field"><label>เรื่อง</label><input class="input" id="editSubject" placeholder="เช่น เข้ารับการอบรมเรื่อง... / เข้าเยี่ยมชมและศึกษาดูงาน..."></div>
       <div class="field"><label>ข้อความ</label><textarea class="textarea" id="editMessage"></textarea></div>
       <div class="field"><label>เปลี่ยนรูป</label><input class="input" type="file" id="editPhoto" accept="image/*"></div>
       <button class="pill-btn primary" id="saveEditBtn">บันทึกการแก้ไข</button>
@@ -290,6 +321,7 @@
   // เปลี่ยน PIN ก่อนใช้งานจริง
   const ADMIN_PIN = "2569";
   const STORAGE_KEY = "smss_guestbook_v1";
+  const EVENT_BG_KEY = "smss_guestbook_event_bg_v1";
   const CHANNEL_NAME = "smss_guestbook_channel";
 
   let firebaseReady = false;
@@ -305,12 +337,23 @@
   let videoStream = null;
   let photoTaken = false;
   let penColor = "#4285F4";
+  let currentEventBgDataUrl = "";
+  let currentEventBgName = "";
+  let currentEventBgImage = null;
   const channel = ("BroadcastChannel" in window) ? new BroadcastChannel(CHANNEL_NAME) : null;
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
   const nowISO = () => new Date().toISOString();
+  const formatThaiDateTime = value => {
+    if(!value) return "";
+    const d = value?.toDate ? value.toDate() : new Date(value);
+    if(Number.isNaN(d.getTime())) return "";
+    return new Intl.DateTimeFormat("th-TH",{dateStyle:"medium",timeStyle:"medium",hour12:false,timeZone:"Asia/Bangkok"}).format(d) + " น.";
+  };
+  function updateCheckinClock(){const el=$("#checkinClock");if(el)el.textContent=formatThaiDateTime(new Date());}
+  updateCheckinClock();setInterval(updateCheckinClock,1000);
 
   function toast(msg){const el=$("#toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
   function saveLocal(){localStorage.setItem(STORAGE_KEY,JSON.stringify(guests));}
@@ -352,12 +395,13 @@
 
   async function addGuest(data){
     const id = uid();
+    const localCreatedAt = data.createdAt || nowISO();
     const imageUrl = await uploadImageIfFirebase(data.photo,id);
-    const guest = {...data,id,photo:imageUrl,createdAt:nowISO()};
+    const guest = {...data,id,photo:imageUrl,createdAt:localCreatedAt};
+    guests = [guest, ...guests.filter(g=>g.id!==id)];
+    saveLocal();renderAll();broadcast("add",guest);
     if(firebaseReady){
-      await fb.setDoc(fb.doc(db,"guestbookEntries",id),{...guest,createdAt:fb.serverTimestamp()});
-    }else{
-      guests.unshift(guest);saveLocal();renderAll();broadcast("add",guest);
+      await fb.setDoc(fb.doc(db,"guestbookEntries",id),{...guest,createdAt:fb.serverTimestamp(),clientCreatedAt:localCreatedAt});
     }
     celebrate(guest);
     return guest;
@@ -367,15 +411,17 @@
     const idx=guests.findIndex(g=>g.id===id);if(idx<0)return;
     let next={...patch};
     if(patch.newPhotoDataUrl){next.photo=await uploadImageIfFirebase(patch.newPhotoDataUrl,id);delete next.newPhotoDataUrl;}
-    if(firebaseReady){await fb.updateDoc(fb.doc(db,"guestbookEntries",id),next);}else{guests[idx]={...guests[idx],...next};saveLocal();renderAll();broadcast("update",{id,patch:next});}
+    guests[idx]={...guests[idx],...next};saveLocal();renderAll();broadcast("update",{id,patch:next});
+    if(firebaseReady){await fb.updateDoc(fb.doc(db,"guestbookEntries",id),next);}
   }
 
   async function deleteGuest(id){
     if(!confirm("ยืนยันการลบข้อมูลผู้มาเยือนรายการนี้?"))return;
+    guests=guests.filter(g=>g.id!==id);saveLocal();renderAll();broadcast("delete",{id});
     if(firebaseReady){
       await fb.deleteDoc(fb.doc(db,"guestbookEntries",id));
       try{await fb.deleteObject(fb.ref(storage,`guestbook/${id}.jpg`));}catch{}
-    }else{guests=guests.filter(g=>g.id!==id);saveLocal();renderAll();broadcast("delete",{id});}
+    }
     closeGuestModal();toast("ลบข้อมูลแล้ว");
   }
 
@@ -385,7 +431,7 @@
     if(!guests.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">ยังไม่มีผู้มาเยือนเช็คอิน<br>เมื่อมีการเช็คอิน การ์ดจะปรากฏที่นี่อัตโนมัติ</div>';return;}
     guests.forEach(g=>{
       const card=document.createElement("article");card.className="guest-card";card.dataset.id=g.id;
-      card.innerHTML=`<div class="card-admin"><button class="mini-btn edit-card" title="แก้ไข">✎</button><button class="mini-btn delete-card" title="ลบ">🗑</button></div><img src="${escapeAttr(g.photo||"")}" alt="${escapeAttr(g.name||"ผู้มาเยือน")}"><div class="guest-body"><div class="guest-name">${escapeHtml(g.name||"ไม่ระบุชื่อ")}</div><div class="guest-role">${escapeHtml([g.position,g.affiliation].filter(Boolean).join(" • ")||"ผู้มาเยือน")}</div><div class="guest-msg">${escapeHtml(g.message||"ยินดีที่ได้มาเยือน")}</div></div>`;
+      card.innerHTML=`<div class="card-admin"><button class="mini-btn edit-card" title="แก้ไข">✎</button><button class="mini-btn delete-card" title="ลบ">🗑</button></div><img src="${escapeAttr(g.photo||"")}" alt="${escapeAttr(g.name||"ผู้มาเยือน")}"><div class="guest-body"><div class="guest-name">${escapeHtml(g.name||"ไม่ระบุชื่อ")}</div><div class="guest-role">${escapeHtml([g.position,g.affiliation].filter(Boolean).join(" • ")||"ผู้มาเยือน")}</div><div class="guest-msg" style="font-weight:800;color:#7A5B13;margin-bottom:5px">${escapeHtml(g.subject ? `เรื่อง: ${g.subject}` : "")}</div><div class="guest-msg">${escapeHtml(g.message||"ยินดีที่ได้มาเยือน")}</div><div class="guest-time">🕒 ${escapeHtml(formatThaiDateTime(g.createdAt)||"ไม่ระบุเวลา")}</div></div>`;
       card.addEventListener("click",e=>{if(e.target.closest(".edit-card")){e.stopPropagation();openEdit(g.id)}else if(e.target.closest(".delete-card")){e.stopPropagation();deleteGuest(g.id)}else openGuestModal(g.id)});
       grid.appendChild(card);
     });
@@ -395,15 +441,49 @@
 
   function openGuestModal(id){
     const g=guests.find(x=>x.id===id);if(!g)return;currentGuestId=id;
-    $("#modalPhoto").src=g.photo||"";$("#modalName").textContent=g.name||"ไม่ระบุชื่อ";$("#modalRole").textContent=[g.position,g.affiliation].filter(Boolean).join(" • ")||"ผู้มาเยือน";$("#modalMessage").textContent=g.message||"ยินดีที่ได้มาเยือน";$("#guestModal").classList.add("show");
+    $("#modalPhoto").src=g.photo||"";$("#modalName").textContent=g.name||"ไม่ระบุชื่อ";$("#modalRole").textContent=[g.position,g.affiliation].filter(Boolean).join(" • ")||"ผู้มาเยือน";$("#modalSubject").textContent=g.subject?`เรื่อง: ${g.subject}`:"";$("#modalMessage").textContent=g.message||"ยินดีที่ได้มาเยือน";$("#modalTime").textContent=`🕒 เช็คอิน ${formatThaiDateTime(g.createdAt)||"ไม่ระบุเวลา"}`;$("#guestModal").classList.add("show");
   }
   function closeGuestModal(){$("#guestModal").classList.remove("show");currentGuestId=null}
 
   function openEdit(id){
-    const g=guests.find(x=>x.id===id);if(!g)return;editingGuestId=id;$("#editName").value=g.name||"";$("#editPosition").value=g.position||"";$("#editAffiliation").value=g.affiliation||"";$("#editMessage").value=g.message||"";$("#editPhoto").value="";$("#editModal").classList.add("show");
+    const g=guests.find(x=>x.id===id);if(!g)return;editingGuestId=id;$("#editName").value=g.name||"";$("#editPosition").value=g.position||"";$("#editAffiliation").value=g.affiliation||"";$("#editSubject").value=g.subject||"";$("#editMessage").value=g.message||"";$("#editPhoto").value="";$("#editModal").classList.add("show");
   }
 
   async function fileToDataUrl(file){return await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});}
+
+  async function compressEventBackground(file){
+    const src=await fileToDataUrl(file);
+    const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src});
+    const maxW=1600,maxH=1000,scale=Math.min(1,maxW/img.width,maxH/img.height);
+    const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    return c.toDataURL('image/jpeg',.80);
+  }
+  function applyEventBackground(){
+    const preview=$("#eventBgPreview"),img=$("#eventBgPreviewImg"),label=$("#eventBgName"),screen=$("#bigScreen");
+    if(currentEventBgDataUrl){
+      preview.classList.add('show');img.src=currentEventBgDataUrl;label.textContent=currentEventBgName||'พื้นหลังกิจกรรมปัจจุบัน';
+      screen.style.backgroundImage=`linear-gradient(rgba(255,255,255,.74),rgba(255,255,255,.74)),url("${currentEventBgDataUrl}")`;
+      screen.style.backgroundSize='cover';screen.style.backgroundPosition='center';
+      const im=new Image();im.onload=()=>{currentEventBgImage=im};im.src=currentEventBgDataUrl;
+    }else{
+      preview.classList.remove('show');img.removeAttribute('src');label.textContent='พื้นหลังกิจกรรมปัจจุบัน';currentEventBgImage=null;
+      screen.style.backgroundImage='linear-gradient(135deg,#FFF,#FAFBF8 56%,#F7F1D8)';
+    }
+  }
+  try{const saved=JSON.parse(localStorage.getItem(EVENT_BG_KEY)||'null');if(saved?.dataUrl){currentEventBgDataUrl=saved.dataUrl;currentEventBgName=saved.name||'';}}catch{}
+  applyEventBackground();
+  $("#eventBgBtn").addEventListener('click',()=>$("#eventBgInput").click());
+  $("#eventBgInput").addEventListener('change',async e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    try{
+      currentEventBgDataUrl=await compressEventBackground(file);currentEventBgName=file.name;
+      try{localStorage.setItem(EVENT_BG_KEY,JSON.stringify({dataUrl:currentEventBgDataUrl,name:currentEventBgName}))}catch(err){console.warn(err);toast('พื้นหลังมีขนาดใหญ่เกินพื้นที่จัดเก็บของเบราว์เซอร์ แต่ยังใช้ได้ในรอบนี้');}
+      applyEventBackground();broadcast('event-background',{dataUrl:currentEventBgDataUrl,name:currentEventBgName});toast('ตั้งค่าพื้นหลังกิจกรรมแล้ว');
+    }catch(err){console.error(err);toast('ไม่สามารถอ่านภาพพื้นหลังได้');}
+    e.target.value='';
+  });
+  $("#clearEventBgBtn").addEventListener('click',()=>{currentEventBgDataUrl='';currentEventBgName='';currentEventBgImage=null;localStorage.removeItem(EVENT_BG_KEY);applyEventBackground();broadcast('event-background',{dataUrl:'',name:''});toast('ล้างพื้นหลังกิจกรรมแล้ว')});
 
   function switchView(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===id));if(id==='screenView') renderAll();}
   $$('.tab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view)));
@@ -415,15 +495,91 @@
   }
   window.addEventListener('resize',()=>setTimeout(resizeCanvases,80));setTimeout(resizeCanvases,200);
 
-  $("#openCameraBtn").addEventListener("click",async()=>{
-    try{videoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:1280},height:{ideal:960}},audio:false});video.srcObject=videoStream;$("#cameraEmpty").style.display="none";$("#captureBtn").disabled=false;$("#cameraStatus").textContent="กล้องพร้อม";resizeCanvases();}
-    catch(err){console.error(err);toast("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตสิทธิ์กล้องและใช้ HTTPS");$("#cameraStatus").textContent="กล้องใช้งานไม่ได้";}
+  function cameraErrorMessage(err){
+    const name=err?.name||"";
+    if(name==="NotAllowedError" || name==="SecurityError") return "เบราว์เซอร์ไม่อนุญาตให้ใช้กล้อง โปรดอนุญาตสิทธิ์กล้องใน Site settings แล้วโหลดหน้าใหม่";
+    if(name==="NotFoundError" || name==="DevicesNotFoundError") return "ไม่พบกล้องในอุปกรณ์นี้ กรุณาตรวจสอบว่ากล้องเชื่อมต่ออยู่";
+    if(name==="NotReadableError" || name==="TrackStartError") return "กล้องถูกใช้งานโดยแอปอื่นอยู่ กรุณาปิดแอปที่ใช้กล้องแล้วลองใหม่";
+    if(name==="OverconstrainedError" || name==="ConstraintNotSatisfiedError") return "กล้องไม่รองรับค่าที่ร้องขอ ระบบจะลองเปิดด้วยค่าพื้นฐาน";
+    return "เปิดกล้องไม่สำเร็จ กรุณาเปิดลิงก์นี้ด้วย Chrome/Edge โดยตรง หรือใช้ปุ่มเลือกรูปจากเครื่อง";
+  }
+
+  function showCameraHelp(msg){
+    const h=$("#cameraHelp");
+    h.textContent=msg;
+    h.classList.add("show");
+  }
+
+  async function startCamera(){
+    if(!window.isSecureContext){
+      showCameraHelp("หน้านี้ไม่ได้ทำงานใน Secure Context กรุณาเปิด URL https:// ของ Vercel โดยตรง");
+      $("#cameraStatus").textContent="ต้องใช้ HTTPS";
+      return;
+    }
+    if(!navigator.mediaDevices?.getUserMedia){
+      showCameraHelp("เบราว์เซอร์นี้ไม่รองรับการเปิดกล้องจากหน้าเว็บ กรุณาเปิดด้วย Chrome หรือ Edge เวอร์ชันล่าสุด หรือเลือกรูปจากเครื่องแทน");
+      $("#cameraStatus").textContent="เบราว์เซอร์ไม่รองรับกล้อง";
+      return;
+    }
+    if(window.self!==window.top){
+      showCameraHelp("กำลังเปิดอยู่ภายใน iframe เช่น Google Sites ซึ่งอาจบล็อกกล้อง แนะนำให้เปิด Digital Guestbook ในแท็บใหม่โดยใช้ URL ของ Vercel โดยตรง");
+    }
+    if(videoStream){videoStream.getTracks().forEach(t=>t.stop());videoStream=null;}
+    const attempts=[
+      {video:{facingMode:{ideal:"user"},width:{ideal:1280},height:{ideal:960}},audio:false},
+      {video:{facingMode:"user"},audio:false},
+      {video:true,audio:false}
+    ];
+    let lastErr=null;
+    for(const constraints of attempts){
+      try{
+        videoStream=await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject=videoStream;
+        await video.play().catch(()=>{});
+        $("#cameraEmpty").style.display="none";
+        $("#captureBtn").disabled=false;
+        $("#cameraStatus").textContent="กล้องพร้อม";
+        $("#cameraHelp").classList.remove("show");
+        resizeCanvases();
+        return;
+      }catch(err){lastErr=err;console.warn("camera attempt failed",constraints,err);}
+    }
+    console.error(lastErr);
+    $("#cameraStatus").textContent="กล้องใช้งานไม่ได้";
+    const msg=cameraErrorMessage(lastErr);
+    showCameraHelp(msg);
+    toast(msg);
+  }
+
+  $("#openCameraBtn").addEventListener("click",startCamera);
+
+  $("#uploadPhotoBtn").addEventListener("click",()=>$("#uploadPhotoInput").click());
+  $("#uploadPhotoInput").addEventListener("change",async e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    try{
+      const dataUrl=await fileToDataUrl(file);
+      const img=new Image();
+      img.onload=()=>{
+        const rect=shell.getBoundingClientRect(),ratio=window.devicePixelRatio||1;
+        photoCanvas.width=Math.max(1,Math.round(rect.width*ratio));
+        photoCanvas.height=Math.max(1,Math.round(rect.height*ratio));
+        const ctx=photoCanvas.getContext('2d');
+        const scale=Math.max(photoCanvas.width/img.width,photoCanvas.height/img.height);
+        const w=img.width*scale,h=img.height*scale,x=(photoCanvas.width-w)/2,y=(photoCanvas.height-h)/2;
+        ctx.clearRect(0,0,photoCanvas.width,photoCanvas.height);
+        ctx.drawImage(img,x,y,w,h);
+        photoCanvas.style.display='block';video.style.display='none';$("#cameraEmpty").style.display="none";
+        photoTaken=true;$("#retakeBtn").disabled=false;$("#captureBtn").disabled=true;$("#cameraStatus").textContent="เลือกรูปแล้ว • พร้อมเซ็น";clearDraw();
+      };
+      img.src=dataUrl;
+    }catch(err){console.error(err);toast("ไม่สามารถอ่านไฟล์รูปได้ กรุณาลองใหม่");}
+    e.target.value="";
   });
 
   $("#captureBtn").addEventListener("click",()=>{
     const rect=shell.getBoundingClientRect(),ratio=window.devicePixelRatio||1;photoCanvas.width=Math.round(rect.width*ratio);photoCanvas.height=Math.round(rect.height*ratio);const ctx=photoCanvas.getContext('2d');ctx.save();ctx.translate(photoCanvas.width,0);ctx.scale(-1,1);ctx.drawImage(video,0,0,photoCanvas.width,photoCanvas.height);ctx.restore();photoCanvas.style.display='block';video.style.display='none';photoTaken=true;$("#retakeBtn").disabled=false;$("#captureBtn").disabled=true;$("#cameraStatus").textContent="ถ่ายรูปแล้ว • พร้อมเซ็น";clearDraw();
   });
-  $("#retakeBtn").addEventListener("click",()=>{photoTaken=false;photoCanvas.style.display='none';video.style.display='block';$("#captureBtn").disabled=false;$("#retakeBtn").disabled=true;$("#cameraStatus").textContent="กล้องพร้อม";clearDraw();});
+  $("#retakeBtn").addEventListener("click",()=>{photoTaken=false;photoCanvas.style.display='none';video.style.display='block';$("#retakeBtn").disabled=true;clearDraw();if(videoStream){$("#captureBtn").disabled=false;$("#cameraStatus").textContent="กล้องพร้อม";}else{$("#captureBtn").disabled=true;$("#cameraStatus").textContent="เลือกเปิดกล้องหรือเลือกรูป";$("#cameraEmpty").style.display="grid";}});
   function clearDraw(){drawCanvas.getContext('2d').clearRect(0,0,drawCanvas.width,drawCanvas.height)}
   $("#clearDrawBtn").addEventListener("click",clearDraw);
   $$('.swatch').forEach(s=>s.addEventListener('click',()=>{$$('.swatch').forEach(x=>x.classList.remove('active'));s.classList.add('active');penColor=s.dataset.color}));
@@ -433,11 +589,30 @@
   drawCanvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e),ctx=drawCanvas.getContext('2d');ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.strokeStyle=penColor;ctx.lineWidth=6*(window.devicePixelRatio||1);ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();last=p});
   ['pointerup','pointercancel','pointerleave'].forEach(ev=>drawCanvas.addEventListener(ev,()=>drawing=false));
 
-  function mergedPhoto(){
-    const out=document.createElement('canvas');out.width=photoCanvas.width;out.height=photoCanvas.height;const ctx=out.getContext('2d');ctx.drawImage(photoCanvas,0,0);ctx.drawImage(drawCanvas,0,0,out.width,out.height);
+  async function mergedPhoto(){
+    const out=document.createElement('canvas');out.width=photoCanvas.width;out.height=photoCanvas.height;const ctx=out.getContext('2d');
+    const composed=document.createElement('canvas');composed.width=out.width;composed.height=out.height;const cctx=composed.getContext('2d');cctx.drawImage(photoCanvas,0,0);cctx.drawImage(drawCanvas,0,0,composed.width,composed.height);
+
+    if(currentEventBgDataUrl){
+      let bg=currentEventBgImage;
+      if(!bg || !bg.complete){bg=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=currentEventBgDataUrl})}
+      // พื้นหลังกิจกรรมแบบ cover
+      const scale=Math.max(out.width/bg.width,out.height/bg.height),bw=bg.width*scale,bh=bg.height*scale,bx=(out.width-bw)/2,by=(out.height-bh)/2;
+      ctx.drawImage(bg,bx,by,bw,bh);
+      // วางภาพแขกเป็นการ์ดด้านใน เพื่อให้ยังเห็นพื้นหลังกิจกรรม
+      const pad=Math.round(out.width*.065),topPad=Math.round(out.height*.12),bottomPad=Math.round(out.height*.09);
+      const x=pad,y=topPad,w=out.width-pad*2,h=out.height-topPad-bottomPad;
+      ctx.save();ctx.shadowColor='rgba(0,0,0,.24)';ctx.shadowBlur=Math.round(out.width*.025);ctx.fillStyle='rgba(255,255,255,.96)';ctx.fillRect(x-10,y-10,w+20,h+20);ctx.restore();
+      ctx.drawImage(composed,x,y,w,h);
+      // ป้ายเรื่องด้านล่างแบบโปร่งใส
+      const subject=$("#subject")?.value?.trim();
+      if(subject){ctx.fillStyle='rgba(17,24,39,.72)';ctx.fillRect(x,y+h-Math.round(out.height*.11),w,Math.round(out.height*.11));ctx.fillStyle='#fff';ctx.font=`700 ${Math.max(18,Math.round(out.width*.032))}px "Noto Sans Thai",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';const text='เรื่อง: '+subject;const max=w-40;let shown=text;while(ctx.measureText(shown).width>max && shown.length>12)shown=shown.slice(0,-2);if(shown!==text)shown+='…';ctx.fillText(shown,x+w/2,y+h-Math.round(out.height*.055));}
+    }else{
+      ctx.drawImage(composed,0,0);
+    }
     // กรอบ 4 สีบนรูปจริง
-    const w=18*(window.devicePixelRatio||1),seg=out.width/4;['#4285F4','#EA4335','#FBBC05','#34A853'].forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(i*seg,0,seg,w);ctx.fillRect(i*seg,out.height-w,seg,w)});ctx.fillStyle='#4285F4';ctx.fillRect(0,0,w,out.height);ctx.fillStyle='#34A853';ctx.fillRect(out.width-w,0,w,out.height);
-    return out.toDataURL('image/jpeg',.9);
+    const border=18*(window.devicePixelRatio||1),seg=out.width/4;['#4285F4','#EA4335','#FBBC05','#34A853'].forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(i*seg,0,seg,border);ctx.fillRect(i*seg,out.height-border,seg,border)});ctx.fillStyle='#4285F4';ctx.fillRect(0,0,border,out.height);ctx.fillStyle='#34A853';ctx.fillRect(out.width-border,0,border,out.height);
+    return out.toDataURL('image/jpeg',.90);
   }
 
   $("#guestForm").addEventListener("submit",async e=>{
@@ -445,7 +620,7 @@
     const name=$("#name").value.trim();if(!name){toast("กรุณากรอกชื่อ");return;}
     $("#submitBtn").disabled=true;$("#submitBtn").textContent="กำลังบันทึก...";
     try{
-      const g=await addGuest({name,position:$("#position").value.trim(),affiliation:$("#affiliation").value.trim(),message:$("#message").value.trim(),photo:mergedPhoto()});
+      const g=await addGuest({name,position:$("#position").value.trim(),affiliation:$("#affiliation").value.trim(),subject:$("#subject").value.trim(),message:$("#message").value.trim(),photo:await mergedPhoto(),createdAt:nowISO()});
       $("#guestForm").reset();$("#retakeBtn").click();switchView('screenView');setTimeout(()=>openGuestModal(g.id),500);toast("เช็คอินเรียบร้อยแล้ว");
     }catch(err){console.error(err);toast("บันทึกไม่สำเร็จ กรุณาลองใหม่");}
     finally{$("#submitBtn").disabled=false;$("#submitBtn").textContent="✨ เช็คอิน & ส่งขึ้นจอใหญ่";}
@@ -474,13 +649,27 @@
   $("#adminClose").addEventListener('click',()=>$("#adminModal").classList.remove('show'));
   $("#adminUnlockBtn").addEventListener('click',()=>{if($("#adminPinInput").value===ADMIN_PIN){isAdmin=true;$("#app").classList.add('admin-mode');$("#adminBtn").textContent='🔓';$("#adminModal").classList.remove('show');$("#adminPinInput").value='';toast('เปิดโหมดแอดมินแล้ว')}else toast('PIN ไม่ถูกต้อง')});
   $("#editClose").addEventListener('click',()=>$("#editModal").classList.remove('show'));
-  $("#saveEditBtn").addEventListener('click',async()=>{if(!editingGuestId)return;const file=$("#editPhoto").files[0];const patch={name:$("#editName").value.trim(),position:$("#editPosition").value.trim(),affiliation:$("#editAffiliation").value.trim(),message:$("#editMessage").value.trim()};if(file)patch.newPhotoDataUrl=await fileToDataUrl(file);await updateGuest(editingGuestId,patch);$("#editModal").classList.remove('show');if(currentGuestId===editingGuestId)openGuestModal(editingGuestId);toast('บันทึกการแก้ไขแล้ว')});
+  $("#saveEditBtn").addEventListener('click',async()=>{if(!editingGuestId)return;const file=$("#editPhoto").files[0];const patch={name:$("#editName").value.trim(),position:$("#editPosition").value.trim(),affiliation:$("#editAffiliation").value.trim(),subject:$("#editSubject").value.trim(),message:$("#editMessage").value.trim()};if(file)patch.newPhotoDataUrl=await fileToDataUrl(file);await updateGuest(editingGuestId,patch);$("#editModal").classList.remove('show');if(currentGuestId===editingGuestId)openGuestModal(editingGuestId);toast('บันทึกการแก้ไขแล้ว')});
 
-  // Cross-tab local sync
-  if(channel){channel.onmessage=e=>{const {type,payload}=e.data||{};if(firebaseReady)return;if(type==='add'&&payload?.id&&!guests.some(g=>g.id===payload.id))guests.unshift(payload);if(type==='update'){const i=guests.findIndex(g=>g.id===payload.id);if(i>=0)guests[i]={...guests[i],...payload.patch}}if(type==='delete')guests=guests.filter(g=>g.id!==payload.id);saveLocal();renderAll();if(type==='add'){celebrate(payload)}}}
-  window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY&&!firebaseReady){loadLocal();renderAll()}});
+  // Cross-tab / same-origin sync: ทำงานแม้เปิด Firebase เพื่อให้จอใหญ่ตอบสนองทันที
+  if(channel){
+    channel.onmessage=e=>{
+      const {type,payload}=e.data||{};
+      if(type==='request-state'){broadcast('state',{guests});broadcast('event-background',{dataUrl:currentEventBgDataUrl,name:currentEventBgName});return;}
+      if(type==='event-background'){currentEventBgDataUrl=payload?.dataUrl||'';currentEventBgName=payload?.name||'';try{currentEventBgDataUrl?localStorage.setItem(EVENT_BG_KEY,JSON.stringify({dataUrl:currentEventBgDataUrl,name:currentEventBgName})):localStorage.removeItem(EVENT_BG_KEY)}catch{}applyEventBackground();return;}
+      if(type==='state'&&Array.isArray(payload?.guests)){
+        const byId=new Map(guests.map(g=>[g.id,g]));payload.guests.forEach(g=>{if(g?.id&&!byId.has(g.id))byId.set(g.id,g)});guests=[...byId.values()].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+      }
+      if(type==='add'&&payload?.id){const i=guests.findIndex(g=>g.id===payload.id);if(i>=0)guests[i]={...guests[i],...payload};else guests.unshift(payload);}
+      if(type==='update'){const i=guests.findIndex(g=>g.id===payload?.id);if(i>=0)guests[i]={...guests[i],...payload.patch};}
+      if(type==='delete')guests=guests.filter(g=>g.id!==payload?.id);
+      if(['state','add','update','delete'].includes(type)){saveLocal();renderAll();}
+      if(type==='add'){celebrate(payload);if(document.body.classList.contains('fullscreen-tv'))setTimeout(()=>openGuestModal(payload.id),300);}
+    };
+  }
+  window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY){loadLocal();renderAll()}});
 
-  loadLocal();renderAll();await initFirebase();
+  loadLocal();renderAll();if(channel)broadcast('request-state');await initFirebase();
 </script>
 </body>
 </html>
