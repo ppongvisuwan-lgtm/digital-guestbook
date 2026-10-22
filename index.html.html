@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <title>Digital Guestbook – Built with Gemini</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blue:#4285F4;--red:#EA4335;--yellow:#FBBC05;--green:#34A853;
+      --white:#FFFFFF;--cream:#F5F5DC;--gold:#DAA520;--gray:#9E9E9E;
+      --ink:#1F2937;--muted:#667085;--line:#E7E7E7;--soft:#FAFAF8;
+      --shadow:0 14px 40px rgba(17,24,39,.10);--shadow-soft:0 8px 24px rgba(17,24,39,.08);
+      --radius:28px;--radius-sm:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:linear-gradient(180deg,#fff 0%,#fff 62%,#FDFCF6 100%);color:var(--ink);font-family:"Noto Sans Thai","Roboto",sans-serif}
+    body{overflow-x:hidden}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100vh}
+    .topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 22px;background:rgba(255,255,255,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.05)}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{width:44px;height:44px;border-radius:16px;background:conic-gradient(from 15deg,var(--blue),var(--green),var(--yellow),var(--red),var(--blue));padding:4px;box-shadow:var(--shadow-soft)}
+    .brand-mark::after{content:"";display:block;width:100%;height:100%;border-radius:12px;background:#fff}
+    .brand-copy{min-width:0}
+    .brand-title{font-size:18px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .live-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#EAF7EF;color:#16753A;font-size:12px;font-weight:800;letter-spacing:.3px}
+    .live-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(52,168,83,.5);animation:pulse 1.6s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,168,83,.45)}70%{box-shadow:0 0 0 10px rgba(52,168,83,0)}100%{box-shadow:0 0 0 0 rgba(52,168,83,0)}}
+    .icon-btn{width:44px;height:44px;border-radius:50%;border:0;background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center;font-size:20px;transition:.22s}
+    .icon-btn:hover{transform:translateY(-2px)}
+    .tabs-wrap{display:flex;justify-content:center;padding:22px 18px 0}
+    .tabs{display:inline-flex;gap:8px;background:#F2F3F5;padding:6px;border-radius:999px;box-shadow:inset 0 0 0 1px #ECECEC}
+    .tab{border:0;background:transparent;color:#667085;padding:11px 20px;border-radius:999px;font-weight:800;transition:.25s ease}
+    .tab.active{background:#fff;color:#111827;box-shadow:0 6px 18px rgba(17,24,39,.08)}
+    main{max-width:1320px;margin:0 auto;padding:24px 18px 56px}
+    .view{display:none;animation:materialIn .4s cubic-bezier(.2,.8,.2,1)}
+    .view.active{display:block}
+    @keyframes materialIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+    .hero{display:flex;justify-content:space-between;gap:20px;align-items:end;margin:10px 0 24px}
+    .eyebrow{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:.3px;text-transform:uppercase}
+    h1,h2,h3,p{margin-top:0}
+    .hero h1{font-size:clamp(30px,4vw,54px);line-height:1.12;margin-bottom:10px;font-weight:800;max-width:950px}
+    .hero p{color:var(--muted);margin-bottom:0;max-width:800px;line-height:1.7}
+    .grid-checkin{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:24px;align-items:start}
+    .card{background:#fff;border:1px solid rgba(17,24,39,.06);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .card-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .card-title{font-size:18px;font-weight:800;margin:0}
+    .camera-frame{position:relative;border-radius:30px;padding:8px;background:linear-gradient(90deg,var(--blue),var(--red),var(--yellow),var(--green));box-shadow:0 18px 50px rgba(0,0,0,.12);overflow:hidden}
+    .camera-shell{position:relative;border-radius:22px;overflow:hidden;background:#111;aspect-ratio:4/3}
+    .camera-header{position:absolute;z-index:9;left:0;right:0;top:0;padding:13px 16px;background:linear-gradient(180deg,rgba(0,0,0,.68),rgba(0,0,0,0));color:#fff;font-size:13px;font-weight:700;line-height:1.45;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+    #video,#photoCanvas,#drawCanvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    #photoCanvas{display:none}
+    #drawCanvas{z-index:8;touch-action:none}
+    .camera-empty{position:absolute;inset:0;display:grid;place-items:center;color:#fff;text-align:center;padding:24px;background:radial-gradient(circle at center,#30343B,#16181C)}
+    .camera-empty strong{display:block;font-size:18px;margin-bottom:6px}
+    .camera-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;align-items:center}
+    .pill-btn{border:0;border-radius:999px;padding:12px 18px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.22s;box-shadow:0 6px 14px rgba(17,24,39,.08)}
+    .pill-btn:hover{transform:translateY(-2px)}
+    .primary{background:var(--green);color:#fff}.secondary{background:#F2F4F7;color:#344054}.gold{background:var(--gold);color:#fff}.danger{background:#FDECEC;color:#B42318}.blue{background:var(--blue);color:#fff}
+    .swatches{display:flex;gap:8px;align-items:center;margin-left:auto}
+    .swatch{width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #D0D5DD;transition:.18s}
+    .swatch.active{transform:scale(1.15);box-shadow:0 0 0 3px #DCE7FF}
+    .field{margin-bottom:14px}
+    .field label{display:block;font-size:13px;font-weight:800;margin-bottom:7px;color:#344054}
+    .input,.textarea{width:100%;border:1px solid #D9DEE7;border-radius:18px;background:#fff;padding:13px 15px;outline:none;transition:.2s;color:#101828}
+    .textarea{min-height:110px;resize:vertical}
+    .input:focus,.textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(66,133,244,.10)}
+    .hint{font-size:12px;color:var(--muted);line-height:1.6}
+    .submit-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .status-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+    .status-chip{padding:7px 10px;border-radius:999px;background:#F8F9FA;color:#667085;font-size:12px;font-weight:700}
+    .screen-controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+    .big-screen{position:relative;min-height:360px;border-radius:34px;overflow:hidden;background:linear-gradient(135deg,#FFF,#FAFBF8 56%,#F7F1D8);border:1px solid #ECEAE4;box-shadow:var(--shadow);padding:28px}
+    .big-screen::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 12%,rgba(66,133,244,.12),transparent 23%),radial-gradient(circle at 90% 12%,rgba(234,67,53,.10),transparent 20%),radial-gradient(circle at 86% 86%,rgba(52,168,83,.12),transparent 22%),radial-gradient(circle at 14% 86%,rgba(251,188,5,.12),transparent 22%);pointer-events:none}
+    .welcome{text-align:center;position:relative;z-index:3;max-width:1000px;margin:0 auto 10px}
+    .welcome h2{font-size:clamp(26px,4vw,48px);line-height:1.2;margin-bottom:8px}
+    .welcome p{color:var(--muted)}
+    .balloon-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .balloon{position:absolute;width:92px;height:116px;border-radius:50% 50% 48% 48%;display:flex;align-items:center;justify-content:center;padding:6px;box-shadow:0 16px 30px rgba(0,0,0,.13);pointer-events:auto;cursor:pointer;animation:floatUp 16s linear forwards, bob 2.8s ease-in-out infinite alternate;transform-origin:center bottom}
+    .balloon::after{content:"";position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid currentColor}
+    .balloon img{width:100%;height:100%;object-fit:cover;border-radius:50%;border:4px solid #fff}
+    @keyframes floatUp{from{transform:translateY(90px)}to{transform:translateY(-430px)}}
+    @keyframes bob{from{margin-left:-5px}to{margin-left:5px}}
+    .guest-wall{margin-top:26px}
+    .section-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+    .guest-card{position:relative;background:#fff;border:1px solid #ECECEC;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-soft);cursor:pointer;transition:.25s;animation:cardIn .45s cubic-bezier(.2,.8,.2,1)}
+    .guest-card:hover{transform:translateY(-5px);box-shadow:0 18px 34px rgba(17,24,39,.12)}
+    @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+    .guest-card img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#F2F4F7}
+    .guest-body{padding:14px 15px 16px}
+    .guest-name{font-weight:800;font-size:17px;margin-bottom:3px}.guest-role{font-size:13px;color:#667085;margin-bottom:8px}.guest-msg{font-size:13px;line-height:1.65;color:#475467;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .card-admin{position:absolute;top:10px;right:10px;display:none;gap:6px;z-index:5}.admin-mode .card-admin{display:flex}.mini-btn{border:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.94);box-shadow:var(--shadow-soft)}
+    .empty-state{padding:38px 18px;text-align:center;border:1px dashed #D0D5DD;border-radius:24px;color:#667085;background:#FCFCFC}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(17,24,39,.42);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:100;padding:18px}
+    .modal-backdrop.show{display:flex;animation:fadeIn .22s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal{width:min(880px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:30px;box-shadow:0 28px 90px rgba(0,0,0,.26);position:relative;animation:popIn .3s cubic-bezier(.2,.9,.2,1)}
+    @keyframes popIn{from{opacity:0;transform:translateY(20px) scale(.94)}to{opacity:1;transform:none}}
+    .modal-close{position:absolute;right:14px;top:14px;z-index:3}
+    .modal-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:0}
+    .modal-photo-wrap{background:#F6F7F8;min-height:360px;display:flex;align-items:center;justify-content:center;padding:18px}
+    .modal-photo-wrap img{width:100%;max-height:62vh;object-fit:contain;border-radius:22px;box-shadow:var(--shadow-soft)}
+    .modal-info{padding:34px 28px}.modal-info h3{font-size:30px;margin-bottom:6px}.modal-role{color:#667085;margin-bottom:16px}.quote{padding:18px;border-radius:20px;background:#FAF6E7;border-left:5px solid var(--gold);line-height:1.8;margin-bottom:18px}.modal-admin-actions{display:none;gap:8px;flex-wrap:wrap}.admin-mode .modal-admin-actions{display:flex}
+    .confetti{position:fixed;width:10px;height:16px;top:-20px;z-index:120;pointer-events:none;animation:confettiFall 2.5s linear forwards}
+    @keyframes confettiFall{to{transform:translate(var(--drift),110vh) rotate(720deg);opacity:.95}}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:12px 16px;border-radius:999px;z-index:150;opacity:0;pointer-events:none;transition:.25s;box-shadow:var(--shadow)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .admin-panel{padding:12px 0 0}.admin-panel small{color:#667085}
+    .fullscreen-tv{max-width:none;padding:10px}.fullscreen-tv .topbar,.fullscreen-tv .tabs-wrap,.fullscreen-tv #checkinView,.fullscreen-tv .screen-controls,.fullscreen-tv .guest-wall{display:none!important}.fullscreen-tv main{max-width:none;padding:10px}.fullscreen-tv #screenView{display:block!important}.fullscreen-tv .big-screen{min-height:calc(100vh - 20px)}
+    @media (max-width:900px){.grid-checkin,.modal-grid{grid-template-columns:1fr}.hero{align-items:start;flex-direction:column}.swatches{margin-left:0}.topbar{padding:12px}.brand-sub{display:none}.modal-photo-wrap{min-height:240px}.modal-info{padding:24px 20px}}
+    @media (max-width:560px){main{padding:18px 12px 44px}.card{padding:16px;border-radius:22px}.camera-frame{border-radius:24px}.camera-shell{border-radius:18px}.top-actions .live-badge{padding:7px 9px}.brand-title{font-size:15px}.tabs-wrap{padding-top:14px}.tab{padding:10px 14px;font-size:13px}.hero h1{font-size:32px}.guest-grid{grid-template-columns:1fr 1fr}.guest-body{padding:10px}.guest-name{font-size:14px}.guest-msg{font-size:12px}.pill-btn{width:100%}.screen-controls .pill-btn{width:auto}.modal-info h3{font-size:24px}}
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div class="brand-copy">
+        <div class="brand-title">Digital Guestbook – Built with Gemini</div>
+        <div class="brand-sub">สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสมุทรสาคร สมุทรสงคราม</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+      <button class="icon-btn" id="adminBtn" title="โหมดแอดมิน" aria-label="โหมดแอดมิน">🔒</button>
+    </div>
+  </header>
+
+  <div class="tabs-wrap">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-view="checkinView">เช็คอิน</button>
+      <button class="tab" data-view="screenView">หน้าจอใหญ่</button>
+    </div>
+  </div>
+
+  <main>
+    <section class="view active" id="checkinView">
+      <div class="hero">
+        <div>
+          <div class="eyebrow">ยินดีต้อนรับ</div>
+          <h1>บันทึกความประทับใจของคุณไว้กับเรา</h1>
+          <p>ถ่ายภาพ วาดลายเซ็น และฝากข้อความต้อนรับ เพื่อส่งขึ้นหน้าจอใหญ่แบบเรียลไทม์</p>
+        </div>
+      </div>
+
+      <div class="grid-checkin">
+        <div class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">ภาพและลายเซ็น</h2>
+            <span class="status-chip" id="cameraStatus">กล้องยังไม่เปิด</span>
+          </div>
+
+          <div class="camera-frame">
+            <div class="camera-shell" id="cameraShell">
+              <div class="camera-header">สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสมุทรสาคร สมุทรสงคราม<br>“Digital Guestbook”</div>
+              <video id="video" autoplay playsinline muted></video>
+              <canvas id="photoCanvas"></canvas>
+              <canvas id="drawCanvas"></canvas>
+              <div class="camera-empty" id="cameraEmpty"><div><strong>พร้อมถ่ายภาพแขกผู้มาเยือน</strong><span>กด “เปิดกล้อง” เพื่อเริ่มต้น</span></div></div>
+            </div>
+          </div>
+
+          <div class="camera-toolbar">
+            <button class="pill-btn blue" id="openCameraBtn">📷 เปิดกล้อง</button>
+            <button class="pill-btn primary" id="captureBtn" disabled>● ถ่ายรูป</button>
+            <button class="pill-btn secondary" id="retakeBtn" disabled>↻ ถ่ายใหม่</button>
+            <button class="pill-btn danger" id="clearDrawBtn">⌫ ลบเส้น</button>
+            <div class="swatches" aria-label="เลือกสีปากกา">
+              <button class="swatch active" data-color="#4285F4" style="background:#4285F4" title="สีน้ำเงิน"></button>
+              <button class="swatch" data-color="#EA4335" style="background:#EA4335" title="สีแดง"></button>
+              <button class="swatch" data-color="#FBBC05" style="background:#FBBC05" title="สีเหลือง"></button>
+              <button class="swatch" data-color="#34A853" style="background:#34A853" title="สีเขียว"></button>
+            </div>
+          </div>
+          <p class="hint" style="margin:12px 2px 0">หลังถ่ายรูป สามารถใช้นิ้วหรือเมาส์วาดลายเซ็นทับบนภาพได้โดยตรง</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row"><h2 class="card-title">ข้อมูลผู้มาเยือน</h2></div>
+          <form id="guestForm">
+            <div class="field"><label for="name">ชื่อ - นามสกุล</label><input class="input" id="name" required placeholder="เช่น นายสมชาย ใจดี"></div>
+            <div class="field"><label for="position">ตำแหน่ง</label><input class="input" id="position" placeholder="เช่น ผู้อำนวยการสถานศึกษา"></div>
+            <div class="field"><label for="affiliation">สังกัด</label><input class="input" id="affiliation" placeholder="เช่น โรงเรียน... / หน่วยงาน..."></div>
+            <div class="field"><label for="message">ข้อความต้อนรับ / คำอวยพร</label><textarea class="textarea" id="message" placeholder="ฝากข้อความแห่งความประทับใจ..."></textarea></div>
+            <div class="submit-row"><button class="pill-btn gold" type="submit" id="submitBtn">✨ เช็คอิน & ส่งขึ้นจอใหญ่</button></div>
+            <div class="status-strip">
+              <span class="status-chip" id="storageStatus">localStorage: พร้อม</span>
+              <span class="status-chip" id="firebaseStatus">Firebase: รอตั้งค่า</span>
+              <span class="status-chip" id="syncStatus">ซิงก์แท็บ: พร้อม</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="screenView">
+      <div class="hero">
+        <div><div class="eyebrow">หน้าจอต้อนรับ</div><h1>ยินดีต้อนรับทุกท่านเข้าสู่สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาสมุทรสาคร สมุทรสงคราม</h1></div>
+      </div>
+
+      <div class="screen-controls">
+        <button class="pill-btn primary" id="slideshowBtn">▶ เล่นสไลด์อัตโนมัติ</button>
+        <button class="pill-btn blue" id="openTvBtn">▣ เปิดจอใหญ่ในหน้าต่างใหม่</button>
+        <button class="pill-btn secondary" id="showLatestBtn">✦ แสดงแขกล่าสุด</button>
+      </div>
+
+      <div class="big-screen" id="bigScreen">
+        <div class="welcome"><h2>ยินดีต้อนรับทุกท่าน</h2><p>ขอให้ทุกการมาเยือนเต็มไปด้วยรอยยิ้ม ความสุข และความประทับใจ</p></div>
+        <div class="balloon-layer" id="balloonLayer"></div>
+      </div>
+
+      <div class="guest-wall">
+        <div class="section-title-row"><h2 style="margin:0">กำแพงผู้มาเยือน</h2><span class="status-chip" id="guestCount">0 คน</span></div>
+        <div class="guest-grid" id="guestGrid"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="guestModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="icon-btn modal-close" id="modalClose">✕</button>
+    <div class="modal-grid">
+      <div class="modal-photo-wrap"><img id="modalPhoto" alt="ภาพผู้มาเยือน"></div>
+      <div class="modal-info">
+        <h3 id="modalName"></h3>
+        <div class="modal-role" id="modalRole"></div>
+        <div class="quote" id="modalMessage"></div>
+        <div class="modal-admin-actions">
+          <button class="pill-btn blue" id="modalEditBtn">✎ แก้ไข</button>
+          <button class="pill-btn danger" id="modalDeleteBtn">🗑 ลบ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="adminModal">
+  <div class="modal" style="width:min(480px,100%)">
+    <button class="icon-btn modal-close" id="adminClose">✕</button>
+    <div class="modal-info">
+      <h3 style="font-size:26px">โหมดแอดมิน</h3>
+      <p class="hint">ใส่ PIN เพื่อเปิดสิทธิ์แก้ไขและลบข้อมูล</p>
+      <div class="field"><label>PIN</label><input class="input" id="adminPinInput" type="password" inputmode="numeric" placeholder="••••"></div>
+      <button class="pill-btn primary" id="adminUnlockBtn">🔓 ปลดล็อก</button>
+      <div class="admin-panel"><small>หมายเหตุ: PIN ในไฟล์ HTML เป็นการป้องกันระดับหน้าเว็บเท่านั้น หากใช้งานจริงควรกำหนด Firebase Security Rules เพิ่มเติม</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="editModal">
+  <div class="modal" style="width:min(620px,100%)">
+    <button class="icon-btn modal-close" id="editClose">✕</button>
+    <div class="modal-info">
+      <h3 style="font-size:26px">แก้ไขข้อมูลผู้มาเยือน</h3>
+      <div class="field"><label>ชื่อ - นามสกุล</label><input class="input" id="editName"></div>
+      <div class="field"><label>ตำแหน่ง</label><input class="input" id="editPosition"></div>
+      <div class="field"><label>สังกัด</label><input class="input" id="editAffiliation"></div>
+      <div class="field"><label>ข้อความ</label><textarea class="textarea" id="editMessage"></textarea></div>
+      <div class="field"><label>เปลี่ยนรูป</label><input class="input" type="file" id="editPhoto" accept="image/*"></div>
+      <button class="pill-btn primary" id="saveEditBtn">บันทึกการแก้ไข</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  // ============================================================
+  // 1) FIREBASE CONFIG - กรอกค่าของคุณที่นี่
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: ""
+  };
+
+  // เปลี่ยน PIN ก่อนใช้งานจริง
+  const ADMIN_PIN = "2569";
+  const STORAGE_KEY = "smss_guestbook_v1";
+  const CHANNEL_NAME = "smss_guestbook_channel";
+
+  let firebaseReady = false;
+  let db = null, storage = null;
+  let fb = {};
+  let unsubscribeSnapshot = null;
+  let guests = [];
+  let currentGuestId = null;
+  let editingGuestId = null;
+  let isAdmin = false;
+  let slideshowTimer = null;
+  let balloonCount = 0;
+  let videoStream = null;
+  let photoTaken = false;
+  let penColor = "#4285F4";
+  const channel = ("BroadcastChannel" in window) ? new BroadcastChannel(CHANNEL_NAME) : null;
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
+  const nowISO = () => new Date().toISOString();
+
+  function toast(msg){const el=$("#toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2200)}
+  function saveLocal(){localStorage.setItem(STORAGE_KEY,JSON.stringify(guests));}
+  function loadLocal(){try{guests=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(!Array.isArray(guests)) guests=[]}catch{guests=[]}}
+  function broadcast(type,payload={}){if(channel) channel.postMessage({type,payload,at:Date.now()});}
+
+  async function initFirebase(){
+    const configured = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+    if(!configured){$("#firebaseStatus").textContent="Firebase: รอตั้งค่า";return;}
+    try{
+      const appMod = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
+      const fsMod = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+      const stMod = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js");
+      const app = appMod.initializeApp(firebaseConfig);
+      db = fsMod.getFirestore(app); storage = stMod.getStorage(app);
+      fb = {...fsMod,...stMod}; firebaseReady = true;
+      $("#firebaseStatus").textContent="Firebase: เชื่อมต่อแล้ว";
+      subscribeFirestore();
+    }catch(err){console.error(err);$("#firebaseStatus").textContent="Firebase: เชื่อมต่อไม่สำเร็จ";toast("เชื่อมต่อ Firebase ไม่สำเร็จ ใช้งานแบบออฟไลน์ต่อได้");}
+  }
+
+  function subscribeFirestore(){
+    if(!firebaseReady) return;
+    const q = fb.query(fb.collection(db,"guestbookEntries"),fb.orderBy("createdAt","desc"));
+    unsubscribeSnapshot = fb.onSnapshot(q,snap=>{
+      const remote=[];snap.forEach(d=>remote.push({id:d.id,...d.data()}));
+      guests = remote.map(g=>({...g,createdAt:g.createdAt?.toDate ? g.createdAt.toDate().toISOString() : g.createdAt}));
+      saveLocal();renderAll();
+    },err=>{console.error(err);toast("ซิงก์ Firestore มีปัญหา")});
+  }
+
+  async function uploadImageIfFirebase(dataUrl,id){
+    if(!firebaseReady) return dataUrl;
+    const blob = await (await fetch(dataUrl)).blob();
+    const ref = fb.ref(storage,`guestbook/${id}.jpg`);
+    await fb.uploadBytes(ref,blob,{contentType:"image/jpeg"});
+    return await fb.getDownloadURL(ref);
+  }
+
+  async function addGuest(data){
+    const id = uid();
+    const imageUrl = await uploadImageIfFirebase(data.photo,id);
+    const guest = {...data,id,photo:imageUrl,createdAt:nowISO()};
+    if(firebaseReady){
+      await fb.setDoc(fb.doc(db,"guestbookEntries",id),{...guest,createdAt:fb.serverTimestamp()});
+    }else{
+      guests.unshift(guest);saveLocal();renderAll();broadcast("add",guest);
+    }
+    celebrate(guest);
+    return guest;
+  }
+
+  async function updateGuest(id,patch){
+    const idx=guests.findIndex(g=>g.id===id);if(idx<0)return;
+    let next={...patch};
+    if(patch.newPhotoDataUrl){next.photo=await uploadImageIfFirebase(patch.newPhotoDataUrl,id);delete next.newPhotoDataUrl;}
+    if(firebaseReady){await fb.updateDoc(fb.doc(db,"guestbookEntries",id),next);}else{guests[idx]={...guests[idx],...next};saveLocal();renderAll();broadcast("update",{id,patch:next});}
+  }
+
+  async function deleteGuest(id){
+    if(!confirm("ยืนยันการลบข้อมูลผู้มาเยือนรายการนี้?"))return;
+    if(firebaseReady){
+      await fb.deleteDoc(fb.doc(db,"guestbookEntries",id));
+      try{await fb.deleteObject(fb.ref(storage,`guestbook/${id}.jpg`));}catch{}
+    }else{guests=guests.filter(g=>g.id!==id);saveLocal();renderAll();broadcast("delete",{id});}
+    closeGuestModal();toast("ลบข้อมูลแล้ว");
+  }
+
+  function renderAll(){renderGuestGrid();$("#guestCount").textContent=`${guests.length} คน`;}
+  function renderGuestGrid(){
+    const grid=$("#guestGrid");grid.innerHTML="";
+    if(!guests.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">ยังไม่มีผู้มาเยือนเช็คอิน<br>เมื่อมีการเช็คอิน การ์ดจะปรากฏที่นี่อัตโนมัติ</div>';return;}
+    guests.forEach(g=>{
+      const card=document.createElement("article");card.className="guest-card";card.dataset.id=g.id;
+      card.innerHTML=`<div class="card-admin"><button class="mini-btn edit-card" title="แก้ไข">✎</button><button class="mini-btn delete-card" title="ลบ">🗑</button></div><img src="${escapeAttr(g.photo||"")}" alt="${escapeAttr(g.name||"ผู้มาเยือน")}"><div class="guest-body"><div class="guest-name">${escapeHtml(g.name||"ไม่ระบุชื่อ")}</div><div class="guest-role">${escapeHtml([g.position,g.affiliation].filter(Boolean).join(" • ")||"ผู้มาเยือน")}</div><div class="guest-msg">${escapeHtml(g.message||"ยินดีที่ได้มาเยือน")}</div></div>`;
+      card.addEventListener("click",e=>{if(e.target.closest(".edit-card")){e.stopPropagation();openEdit(g.id)}else if(e.target.closest(".delete-card")){e.stopPropagation();deleteGuest(g.id)}else openGuestModal(g.id)});
+      grid.appendChild(card);
+    });
+  }
+  const escapeHtml=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  const escapeAttr=escapeHtml;
+
+  function openGuestModal(id){
+    const g=guests.find(x=>x.id===id);if(!g)return;currentGuestId=id;
+    $("#modalPhoto").src=g.photo||"";$("#modalName").textContent=g.name||"ไม่ระบุชื่อ";$("#modalRole").textContent=[g.position,g.affiliation].filter(Boolean).join(" • ")||"ผู้มาเยือน";$("#modalMessage").textContent=g.message||"ยินดีที่ได้มาเยือน";$("#guestModal").classList.add("show");
+  }
+  function closeGuestModal(){$("#guestModal").classList.remove("show");currentGuestId=null}
+
+  function openEdit(id){
+    const g=guests.find(x=>x.id===id);if(!g)return;editingGuestId=id;$("#editName").value=g.name||"";$("#editPosition").value=g.position||"";$("#editAffiliation").value=g.affiliation||"";$("#editMessage").value=g.message||"";$("#editPhoto").value="";$("#editModal").classList.add("show");
+  }
+
+  async function fileToDataUrl(file){return await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)});}
+
+  function switchView(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===id));if(id==='screenView') renderAll();}
+  $$('.tab').forEach(t=>t.addEventListener('click',()=>switchView(t.dataset.view)));
+
+  // Camera + Signature
+  const video=$("#video"), photoCanvas=$("#photoCanvas"), drawCanvas=$("#drawCanvas"), shell=$("#cameraShell");
+  function resizeCanvases(){
+    const rect=shell.getBoundingClientRect();[photoCanvas,drawCanvas].forEach(c=>{const ratio=window.devicePixelRatio||1;const old=c.toDataURL();c.width=Math.max(1,Math.round(rect.width*ratio));c.height=Math.max(1,Math.round(rect.height*ratio));c.style.width=rect.width+'px';c.style.height=rect.height+'px';if(c===drawCanvas && old && old!=='data:,'){const im=new Image();im.onload=()=>c.getContext('2d').drawImage(im,0,0,c.width,c.height);im.src=old;}});
+  }
+  window.addEventListener('resize',()=>setTimeout(resizeCanvases,80));setTimeout(resizeCanvases,200);
+
+  $("#openCameraBtn").addEventListener("click",async()=>{
+    try{videoStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:1280},height:{ideal:960}},audio:false});video.srcObject=videoStream;$("#cameraEmpty").style.display="none";$("#captureBtn").disabled=false;$("#cameraStatus").textContent="กล้องพร้อม";resizeCanvases();}
+    catch(err){console.error(err);toast("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตสิทธิ์กล้องและใช้ HTTPS");$("#cameraStatus").textContent="กล้องใช้งานไม่ได้";}
+  });
+
+  $("#captureBtn").addEventListener("click",()=>{
+    const rect=shell.getBoundingClientRect(),ratio=window.devicePixelRatio||1;photoCanvas.width=Math.round(rect.width*ratio);photoCanvas.height=Math.round(rect.height*ratio);const ctx=photoCanvas.getContext('2d');ctx.save();ctx.translate(photoCanvas.width,0);ctx.scale(-1,1);ctx.drawImage(video,0,0,photoCanvas.width,photoCanvas.height);ctx.restore();photoCanvas.style.display='block';video.style.display='none';photoTaken=true;$("#retakeBtn").disabled=false;$("#captureBtn").disabled=true;$("#cameraStatus").textContent="ถ่ายรูปแล้ว • พร้อมเซ็น";clearDraw();
+  });
+  $("#retakeBtn").addEventListener("click",()=>{photoTaken=false;photoCanvas.style.display='none';video.style.display='block';$("#captureBtn").disabled=false;$("#retakeBtn").disabled=true;$("#cameraStatus").textContent="กล้องพร้อม";clearDraw();});
+  function clearDraw(){drawCanvas.getContext('2d').clearRect(0,0,drawCanvas.width,drawCanvas.height)}
+  $("#clearDrawBtn").addEventListener("click",clearDraw);
+  $$('.swatch').forEach(s=>s.addEventListener('click',()=>{$$('.swatch').forEach(x=>x.classList.remove('active'));s.classList.add('active');penColor=s.dataset.color}));
+  let drawing=false,last={x:0,y:0};
+  function pt(e){const r=drawCanvas.getBoundingClientRect(),ratio=window.devicePixelRatio||1;return{x:(e.clientX-r.left)*ratio,y:(e.clientY-r.top)*ratio}}
+  drawCanvas.addEventListener('pointerdown',e=>{if(!photoTaken)return;drawing=true;last=pt(e);drawCanvas.setPointerCapture(e.pointerId)});
+  drawCanvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e),ctx=drawCanvas.getContext('2d');ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.strokeStyle=penColor;ctx.lineWidth=6*(window.devicePixelRatio||1);ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();last=p});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>drawCanvas.addEventListener(ev,()=>drawing=false));
+
+  function mergedPhoto(){
+    const out=document.createElement('canvas');out.width=photoCanvas.width;out.height=photoCanvas.height;const ctx=out.getContext('2d');ctx.drawImage(photoCanvas,0,0);ctx.drawImage(drawCanvas,0,0,out.width,out.height);
+    // กรอบ 4 สีบนรูปจริง
+    const w=18*(window.devicePixelRatio||1),seg=out.width/4;['#4285F4','#EA4335','#FBBC05','#34A853'].forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(i*seg,0,seg,w);ctx.fillRect(i*seg,out.height-w,seg,w)});ctx.fillStyle='#4285F4';ctx.fillRect(0,0,w,out.height);ctx.fillStyle='#34A853';ctx.fillRect(out.width-w,0,w,out.height);
+    return out.toDataURL('image/jpeg',.9);
+  }
+
+  $("#guestForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!photoTaken){toast("กรุณาถ่ายรูปก่อนเช็คอิน");return;}
+    const name=$("#name").value.trim();if(!name){toast("กรุณากรอกชื่อ");return;}
+    $("#submitBtn").disabled=true;$("#submitBtn").textContent="กำลังบันทึก...";
+    try{
+      const g=await addGuest({name,position:$("#position").value.trim(),affiliation:$("#affiliation").value.trim(),message:$("#message").value.trim(),photo:mergedPhoto()});
+      $("#guestForm").reset();$("#retakeBtn").click();switchView('screenView');setTimeout(()=>openGuestModal(g.id),500);toast("เช็คอินเรียบร้อยแล้ว");
+    }catch(err){console.error(err);toast("บันทึกไม่สำเร็จ กรุณาลองใหม่");}
+    finally{$("#submitBtn").disabled=false;$("#submitBtn").textContent="✨ เช็คอิน & ส่งขึ้นจอใหญ่";}
+  });
+
+  function celebrate(g){spawnBalloon(g);confettiBurst();}
+  function spawnBalloon(g){
+    if(!g?.photo)return;const layer=$("#balloonLayer");while(layer.children.length>=25) layer.firstElementChild?.remove();
+    const colors=['#4285F4','#EA4335','#FBBC05','#34A853'];const b=document.createElement('div');b.className='balloon';b.style.left=`${5+Math.random()*86}%`;b.style.bottom='-120px';b.style.background=colors[balloonCount++%colors.length];b.style.color=b.style.background;b.innerHTML=`<img src="${escapeAttr(g.photo)}" alt="${escapeAttr(g.name)}">`;b.addEventListener('click',()=>{openGuestModal(g.id);b.remove()});b.addEventListener('animationend',e=>{if(e.animationName==='floatUp')b.remove()});layer.appendChild(b);
+  }
+  function confettiBurst(){const colors=['#4285F4','#EA4335','#FBBC05','#34A853'];for(let i=0;i<80;i++){const c=document.createElement('i');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=colors[i%4];c.style.setProperty('--drift',`${-80+Math.random()*160}px`);c.style.animationDelay=(Math.random()*.5)+'s';c.style.transform=`rotate(${Math.random()*180}deg)`;document.body.appendChild(c);setTimeout(()=>c.remove(),3200)}}
+
+  $("#slideshowBtn").addEventListener('click',()=>{
+    if(slideshowTimer){clearInterval(slideshowTimer);slideshowTimer=null;$("#slideshowBtn").textContent='▶ เล่นสไลด์อัตโนมัติ';toast('หยุดสไลด์อัตโนมัติแล้ว');return;}
+    if(!guests.length){toast('ยังไม่มีข้อมูลผู้มาเยือน');return;}let i=0;openGuestModal(guests[0].id);slideshowTimer=setInterval(()=>{if(!guests.length)return;i=(i+1)%guests.length;openGuestModal(guests[i].id)},4000);$("#slideshowBtn").textContent='■ หยุดสไลด์อัตโนมัติ';
+  });
+  $("#showLatestBtn").addEventListener('click',()=>{if(guests[0]){spawnBalloon(guests[0]);confettiBurst();openGuestModal(guests[0].id)}else toast('ยังไม่มีข้อมูลผู้มาเยือน')});
+  $("#openTvBtn").addEventListener('click',()=>{const u=new URL(location.href);u.searchParams.set('tv','1');window.open(u.toString(),'guestbook-tv','noopener,noreferrer,width=1600,height=900')});
+  if(new URLSearchParams(location.search).get('tv')==='1'){document.body.classList.add('fullscreen-tv');switchView('screenView');}
+
+  $("#modalClose").addEventListener('click',closeGuestModal);$("#guestModal").addEventListener('click',e=>{if(e.target===$("#guestModal"))closeGuestModal()});
+  $("#modalEditBtn").addEventListener('click',()=>currentGuestId&&openEdit(currentGuestId));$("#modalDeleteBtn").addEventListener('click',()=>currentGuestId&&deleteGuest(currentGuestId));
+
+  // Admin
+  $("#adminBtn").addEventListener('click',()=>{if(isAdmin){isAdmin=false;$("#app").classList.remove('admin-mode');$("#adminBtn").textContent='🔒';toast('ออกจากโหมดแอดมินแล้ว')}else $("#adminModal").classList.add('show')});
+  $("#adminClose").addEventListener('click',()=>$("#adminModal").classList.remove('show'));
+  $("#adminUnlockBtn").addEventListener('click',()=>{if($("#adminPinInput").value===ADMIN_PIN){isAdmin=true;$("#app").classList.add('admin-mode');$("#adminBtn").textContent='🔓';$("#adminModal").classList.remove('show');$("#adminPinInput").value='';toast('เปิดโหมดแอดมินแล้ว')}else toast('PIN ไม่ถูกต้อง')});
+  $("#editClose").addEventListener('click',()=>$("#editModal").classList.remove('show'));
+  $("#saveEditBtn").addEventListener('click',async()=>{if(!editingGuestId)return;const file=$("#editPhoto").files[0];const patch={name:$("#editName").value.trim(),position:$("#editPosition").value.trim(),affiliation:$("#editAffiliation").value.trim(),message:$("#editMessage").value.trim()};if(file)patch.newPhotoDataUrl=await fileToDataUrl(file);await updateGuest(editingGuestId,patch);$("#editModal").classList.remove('show');if(currentGuestId===editingGuestId)openGuestModal(editingGuestId);toast('บันทึกการแก้ไขแล้ว')});
+
+  // Cross-tab local sync
+  if(channel){channel.onmessage=e=>{const {type,payload}=e.data||{};if(firebaseReady)return;if(type==='add'&&payload?.id&&!guests.some(g=>g.id===payload.id))guests.unshift(payload);if(type==='update'){const i=guests.findIndex(g=>g.id===payload.id);if(i>=0)guests[i]={...guests[i],...payload.patch}}if(type==='delete')guests=guests.filter(g=>g.id!==payload.id);saveLocal();renderAll();if(type==='add'){celebrate(payload)}}}
+  window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY&&!firebaseReady){loadLocal();renderAll()}});
+
+  loadLocal();renderAll();await initFirebase();
+</script>
+</body>
+</html>
